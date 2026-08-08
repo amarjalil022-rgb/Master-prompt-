@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ibn e Rahat | Premium Culinary Experience</title>
+    
+    <!-- Premium Typography & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#050505',
+                        surface: '#111111',
+                        card: '#1A1A1A',
+                        gold: '#F5A623',
+                        goldHover: '#D48806',
+                        crimson: '#E53935'
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        serif: ['Cinzel', 'serif'],
+                    },
+                    boxShadow: {
+                        'glow': '0 0 20px rgba(245, 166, 35, 0.15)',
+                        'glow-strong': '0 0 30px rgba(245, 166, 35, 0.4)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --glass-bg: rgba(17, 17, 17, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            background-color: theme('colors.dark');
+            color: #ffffff;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Advanced Glassmorphism */
+        .glass-nav {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .glass-panel {
+            background: linear-gradient(145deg, rgba(30,30,30,0.8) 0%, rgba(20,20,20,0.9) 100%);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        /* 3D Menu Cards */
+        .tilt-wrapper {
+            perspective: 1200px;
+            transform-style: preserve-3d;
+        }
+        
+        .tilt-card {
+            will-change: transform;
+            transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s ease, border-color 0.3s ease;
+            background: theme('colors.card');
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .tilt-card:hover {
+            box-shadow: theme('boxShadow.glow-strong');
+            border-color: theme('colors.gold');
+            transform: translateY(-5px);
+        }
+
+        /* Interactive Canvas */
+        #hero-canvas {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: theme('colors.dark'); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: theme('colors.gold'); }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Animations */
+        @keyframes fadeOut { to { opacity: 0; visibility: hidden; z-index: -1; } }
+        .preloader-hide { animation: fadeOut 0.6s ease-in-out forwards; }
+        
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        .floating { animation: float 4s ease-in-out infinite; }
+
+        @keyframes pulse-ring { 
+            0% { transform: scale(0.85); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); } 
+            70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); } 
+            100% { transform: scale(0.85); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); } 
+        }
+        .wa-btn { animation: pulse-ring 2s infinite; }
+
+        .gradient-text {
+            background: linear-gradient(to right, #F5A623, #FFD54F);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-gold selection:text-dark">
+
+    <!-- Preloader -->
+    <div id="preloader" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-dark">
+        <div class="relative w-24 h-24 flex items-center justify-center mb-4">
+            <div class="absolute inset-0 border-4 border-t-gold border-surface rounded-full animate-spin"></div>
+            <i class="fas fa-utensils text-3xl text-white"></i>
+        </div>
+        <h1 class="font-serif text-2xl tracking-[0.2em] text-white uppercase">Ibn e Rahat</h1>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+            <a href="#" class="font-serif text-2xl md:text-3xl font-bold tracking-wider text-white">
+                IBN E <span class="text-gold">RAHAT</span>
+            </a>
+            
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex space-x-8 items-center font-sans text-[15px] font-semibold tracking-wide">
+                <a href="#about" class="text-gray-300 hover:text-gold transition-colors">Our Story</a>
+                <a href="#menu" class="text-gray-300 hover:text-gold transition-colors">The Menu</a>
+                <a href="#booking" class="px-6 py-2.5 bg-gold text-dark rounded-full hover:bg-goldHover transition-all shadow-glow hover:scale-105">Reserve Table</a>
+            </div>
+
+            <!-- Mobile Hamburger -->
+            <button id="mobile-menu-btn" class="md:hidden text-2xl text-white focus:outline-none">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Drawer -->
+    <div id="mobile-drawer" class="fixed inset-0 z-40 bg-dark/95 backdrop-blur-2xl transform translate-x-full transition-transform duration-500 ease-in-out flex flex-col items-center justify-center space-y-8 font-serif text-3xl">
+        <button id="close-drawer" class="absolute top-8 right-8 text-3xl text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+        <a href="#about" class="mobile-link text-white hover:text-gold transition-colors">Our Story</a>
+        <a href="#menu" class="mobile-link text-white hover:text-gold transition-colors">The Menu</a>
+        <a href="#booking" class="mobile-link text-gold">Reservations</a>
+    </div>
+
+    <!-- Hero Section -->
+    <header class="relative h-[100svh] flex items-center justify-center overflow-hidden">
+        <!-- 3D Canvas Background -->
+        <canvas id="hero-canvas"></canvas>
+        
+        <!-- Deep Gradient Overlay -->
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-dark/60 to-dark z-10"></div>
+
+        <div class="relative z-20 text-center px-4 max-w-5xl mx-auto tilt-wrapper w-full">
+            <div class="tilt-card bg-transparent border-none shadow-none" data-tilt>
+                <div class="inline-block px-4 py-1 mb-6 rounded-full border border-gold/30 bg-gold/10 backdrop-blur-sm">
+                    <p class="font-sans text-gold tracking-[0.2em] text-xs font-bold uppercase"><i class="fas fa-star text-[10px] mr-1"></i> Sardheri's Finest Cuisine <i class="fas fa-star text-[10px] ml-1"></i></p>
+                </div>
+                <h1 class="font-serif text-6xl md:text-8xl lg:text-9xl font-bold mb-6 leading-[1.1] text-white drop-shadow-2xl">
+                    Savor the <br>
+                    <span class="gradient-text italic pr-2">Heritage.</span>
+                </h1>
+                <p class="font-sans text-gray-300 text-lg md:text-xl mb-10 max-w-2xl mx-auto font-light leading-relaxed">
+                    An immersive culinary journey blending ancient spices with a modern gastronomic experience. Taste the true soul of the region.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-5 justify-center items-center">
+                    <a href="#menu" class="px-8 py-4 w-full sm:w-auto bg-gold text-dark font-bold font-sans rounded-full hover:bg-goldHover hover:scale-105 transition-all shadow-glow flex items-center justify-center gap-2">
+                        <i class="fas fa-book-open"></i> Explore Menu
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- About Section -->
+    <section id="about" class="py-24 relative z-20 bg-dark">
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
+            <div class="space-y-8">
+                <div>
+                    <h2 class="font-serif text-4xl md:text-5xl font-bold text-white mb-4">The Legacy of <br><span class="text-gold">Ibn e Rahat</span></h2>
+                    <div class="w-24 h-1 bg-gradient-to-r from-gold to-transparent"></div>
+                </div>
+                <p class="text-gray-400 font-sans leading-relaxed text-lg">
+                    Nestled in the heart of Sardheri, Khyber Pakhtunkhwa, Ibn e Rahat is more than a restaurant—it is a tribute to our ancestors. We source the finest local spices, highest-grade meats, and prepare every dish using time-honored slow-cooking techniques. 
+                </p>
+                <p class="text-gray-400 font-sans leading-relaxed text-lg">
+                    Our philosophy is simple: authentic taste presented with modern elegance. Experience hospitality that resonates with the warmth of our rich heritage.
+                </p>
+                
+                <div class="flex gap-8 pt-4">
+                    <div>
+                        <h4 class="font-serif text-3xl text-gold font-bold">100%</h4>
+                        <p class="font-sans text-sm text-gray-400 uppercase tracking-wide">Authentic Spices</p>
+                    </div>
+                    <div>
+                        <h4 class="font-serif text-3xl text-gold font-bold">10+</h4>
+                        <p class="font-sans text-sm text-gray-400 uppercase tracking-wide">Years Experience</p>
+                    </div>
+                </div>
+            </div>
+            <div class="relative tilt-wrapper h-[500px]">
+                <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80" alt="Restaurant Ambiance" class="tilt-card rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] object-cover h-full w-full border border-white/10" data-tilt>
+                
+                <!-- Floating Badge -->
+                <div class="absolute -bottom-6 -left-6 glass-panel p-6 rounded-2xl hidden md:flex items-center gap-4 floating z-10">
+                    <div class="w-12 h-12 rounded-full bg-gold/20 flex items-center justify-center text-gold text-xl">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <div>
+                        <p class="font-serif text-xl text-white font-bold">Premium Quality</p>
+                        <p class="font-sans text-sm text-gray-400">Award-winning local chefs</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Menu Section -->
+    <section id="menu" class="py-24 relative z-20 bg-surface">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <p class="text-gold font-sans font-bold tracking-[0.2em] text-sm uppercase mb-3">Discover</p>
+                <h2 class="font-serif text-4xl md:text-5xl font-bold text-white mb-6">Culinary <span class="gradient-text">Masterpieces</span></h2>
+            </div>
+
+            <!-- Enhanced Category Filters -->
+            <div class="flex overflow-x-auto no-scrollbar gap-3 justify-start md:justify-center mb-12 pb-2">
+                <button class="filter-btn active px-8 py-3 rounded-full bg-gold text-dark font-bold font-sans text-sm transition-all shadow-glow whitespace-nowrap" data-filter="all">All Dishes</button>
+                <button class="filter-btn px-8 py-3 rounded-full bg-card border border-white/10 text-gray-300 font-sans text-sm hover:border-gold hover:text-gold transition-all whitespace-nowrap" data-filter="starters">Starters</button>
+                <button class="filter-btn px-8 py-3 rounded-full bg-card border border-white/10 text-gray-300 font-sans text-sm hover:border-gold hover:text-gold transition-all whitespace-nowrap" data-filter="mains">Mains & BBQ</button>
+                <button class="filter-btn px-8 py-3 rounded-full bg-card border border-white/10 text-gray-300 font-sans text-sm hover:border-gold hover:text-gold transition-all whitespace-nowrap" data-filter="drinks">Drinks & Desserts</button>
+            </div>
+
+            <!-- Dynamic Menu Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8" id="menu-container">
+                <!-- Items injected via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Reservation & Order System -->
+    <section id="booking" class="py-32 relative z-20 bg-dark overflow-hidden">
+        <!-- Background Ambient Glow -->
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-96 bg-gold/5 blur-[150px] rounded-full pointer-events-none"></div>
+        
+        <div class="max-w-6xl mx-auto px-6 relative">
+            <div class="glass-panel rounded-[2.5rem] p-8 md:p-14 shadow-2xl relative overflow-hidden">
+                <!-- Accent Line -->
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-dark via-gold to-dark"></div>
+
+                <div class="text-center mb-12">
+                    <h2 class="font-serif text-3xl md:text-5xl font-bold mb-4 text-white">Finalize Your <span class="text-gold">Experience</span></h2>
+                    <p class="font-sans text-gray-400 text-lg">Build your order or reserve a table. We'll connect instantly via WhatsApp.</p>
+                </div>
+
+                <div class="grid lg:grid-cols-5 gap-12">
+                    
+                    <!-- Form Input Section -->
+                    <form id="wa-form" class="space-y-6 font-sans lg:col-span-3">
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-300 mb-2">Full Name *</label>
+                                <input type="text" id="wa-name" required class="w-full bg-dark/50 border border-white/10 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-300 mb-2">Number of Guests</label>
+                                <input type="number" id="wa-guests" min="1" placeholder="e.g. 4" class="w-full bg-dark/50 border border-white/10 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-300 mb-2">Date & Time of Visit</label>
+                            <input type="datetime-local" id="wa-time" class="w-full bg-dark/50 border border-white/10 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all [color-scheme:dark]">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-300 mb-2">Special Instructions</label>
+                            <textarea id="wa-notes" rows="3" placeholder="Spice level, allergies, or special requests..." class="w-full bg-dark/50 border border-white/10 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="w-full bg-[#25D366] text-white font-bold py-5 rounded-2xl hover:bg-[#1ebe57] transition-all flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(37,211,102,0.25)] hover:scale-[1.01] text-lg">
+                            <i class="fab fa-whatsapp text-2xl"></i> Send to WhatsApp
+                        </button>
+                    </form>
+
+                    <!-- Cart Receipt UI -->
+                    <div class="lg:col-span-2 bg-dark rounded-3xl p-6 md:p-8 border border-white/5 relative">
+                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gold text-dark text-xs font-bold px-4 py-1 rounded-full">YOUR ORDER</div>
+                        
+                        <div id="cart-items" class="space-y-4 mt-4 mb-6 min-h-[150px] max-h-[350px] overflow-y-auto pr-2 text-sm">
+                            <div id="empty-cart-msg" class="flex flex-col items-center justify-center h-[150px] text-gray-500 opacity-60">
+                                <i class="fas fa-shopping-basket text-4xl mb-3"></i>
+                                <p>No dishes selected</p>
+                            </div>
+                            <!-- Items inject here -->
+                        </div>
+                        
+                        <div class="pt-6 border-t border-white/10 border-dashed">
+                            <div class="flex justify-between items-center text-gray-400 text-sm mb-2">
+                                <span>Subtotal</span>
+                                <span id="cart-subtotal">PKR 0</span>
+                            </div>
+                            <div class="flex justify-between items-center font-serif font-bold text-2xl text-white mt-4">
+                                <span>Total</span>
+                                <span class="text-gold">PKR <span id="cart-total">0</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Premium Footer -->
+    <footer class="bg-surface pt-20 pb-10 border-t border-white/5 relative z-20">
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-3 gap-12 mb-16 text-center md:text-left">
+            <div>
+                <h2 class="font-serif text-3xl font-bold mb-6 text-white">IBN E <span class="text-gold">RAHAT</span></h2>
+                <p class="text-gray-400 font-sans mb-6 leading-relaxed">Where authentic heritage meets modern culinary excellence. The finest dining experience in Khyber Pakhtunkhwa.</p>
+                <div class="flex gap-4 justify-center md:justify-start">
+                    <a href="#" class="w-10 h-10 rounded-full bg-card border border-white/10 flex items-center justify-center text-white hover:bg-gold hover:text-dark hover:border-gold transition-all"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="w-10 h-10 rounded-full bg-card border border-white/10 flex items-center justify-center text-white hover:bg-gold hover:text-dark hover:border-gold transition-all"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            <div class="flex flex-col items-center md:items-start">
+                <h3 class="font-serif text-xl font-bold text-white mb-6">Contact Us</h3>
+                <p class="text-gray-400 mb-3 font-sans"><i class="fas fa-map-marker-alt text-gold w-5"></i> Sardheri, Khyber Pakhtunkhwa</p>
+                <p class="text-gray-400 mb-3 font-sans"><i class="fas fa-phone text-gold w-5"></i> +92 326 2626480</p>
+                <p class="text-gray-400 font-sans"><i class="fas fa-envelope text-gold w-5"></i> reservations@ibnerahat.com</p>
+            </div>
+            <div class="flex flex-col items-center md:items-start">
+                <h3 class="font-serif text-xl font-bold text-white mb-6">Opening Hours</h3>
+                <p class="text-gray-400 mb-2 font-sans flex justify-between w-full max-w-[200px]"><span>Mon - Fri:</span> <span>12:00 PM - 11:00 PM</span></p>
+                <p class="text-gray-400 mb-2 font-sans flex justify-between w-full max-w-[200px]"><span>Saturday:</span> <span>12:00 PM - 12:00 AM</span></p>
+                <p class="text-gray-400 font-sans flex justify-between w-full max-w-[200px]"><span>Sunday:</span> <span>1:00 PM - 11:00 PM</span></p>
+            </div>
+        </div>
+        <div class="text-center border-t border-white/10 pt-8">
+            <p class="text-gray-600 text-sm font-sans">&copy; <span id="year"></span> Ibn e Rahat. Masterfully Engineered.</p>
+        </div>
+    </footer>
+
+    <!-- Floating WhatsApp Widget -->
+    <a href="https://wa.me/923262626480" target="_blank" class="fixed bottom-6 right-6 bg-[#25D366] text-white w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-2xl z-50 wa-btn hover:bg-[#1ebe57] transition-colors">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- Core Scripts Engine -->
+    <script>
+        // --- 1. System Initialization & Nav ---
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('preloader').classList.add('preloader-hide');
+            }, 800);
+            document.getElementById('year').textContent = new Date().getFullYear();
+        });
+
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('glass-nav');
+            } else {
+                navbar.classList.remove('glass-nav');
+            }
+        });
+
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const drawer = document.getElementById('mobile-drawer');
+        const closeDrawer = document.getElementById('close-drawer');
+        
+        const toggleDrawer = () => drawer.classList.toggle('translate-x-full');
+        mobileBtn.addEventListener('click', toggleDrawer);
+        closeDrawer.addEventListener('click', toggleDrawer);
+        document.querySelectorAll('.mobile-link').forEach(link => link.addEventListener('click', toggleDrawer));
+
+        // --- 2. Highly Reliable Image Menu Engine ---
+        // I have selected the most robust Unsplash IDs and included a fallback logic.
+        const fallbackImg = "https://images.unsplash.com/photo-1544025162-831154f2a74c?auto=format&fit=crop&w=800&q=80"; 
+
+        const menuData = [
+            { id: 1, name: "Peshawari Chapli Kabab", category: "mains", price: 850, tag: "Signature", desc: "Authentic spiced minced meat patties, pan-fried to crispy perfection.", img: "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=800&q=80" },
+            { id: 2, name: "Namkeen Tikka", category: "starters", price: 900, tag: null, desc: "Tender cubes of meat slow-grilled on skewers with minimal authentic spices.", img: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80" },
+            { id: 3, name: "Special Mutton Karahi", category: "mains", price: 2400, tag: "Chef's Special", desc: "Premium mutton wok-cooked with tomatoes, green chilies, and black pepper.", img: "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=800&q=80" },
+            { id: 4, name: "Handi Chicken", category: "mains", price: 1800, tag: null, desc: "Boneless chicken simmered in a rich, creamy, and aromatic clay-pot gravy.", img: "https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?auto=format&fit=crop&w=800&q=80" },
+            { id: 5, name: "Kabuli Pulao", category: "mains", price: 1200, tag: "Popular", desc: "Aromatic basmati rice topped with sweet carrots, raisins, and tender meat.", img: "https://images.unsplash.com/photo-1633945274405-b6c8069047b0?auto=format&fit=crop&w=800&q=80" },
+            { id: 6, name: "Samosa Platter", category: "starters", price: 450, tag: null, desc: "Crispy golden pastry triangles filled with spiced potatoes and local herbs.", img: "https://images.unsplash.com/photo-1601050690117-94f5f6af8bd3?auto=format&fit=crop&w=800&q=80" },
+            { id: 7, name: "Shahi Tukda", category: "drinks", price: 500, tag: "Dessert", desc: "Royal bread pudding soaked in saffron milk and garnished with mixed nuts.", img: "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=800&q=80" },
+            { id: 8, name: "Karak Chai", category: "drinks", price: 150, tag: null, desc: "Strong, heavily brewed black tea with milk and a touch of fresh cardamom.", img: "https://images.unsplash.com/photo-1576092762791-dd9e2220afa1?auto=format&fit=crop&w=800&q=80" }
+        ];
+
+        const menuContainer = document.getElementById('menu-container');
+
+        function renderMenu(filter = "all") {
+            menuContainer.innerHTML = "";
+            const filtered = filter === "all" ? menuData : menuData.filter(item => item.category === filter);
+            
+            filtered.forEach(item => {
+                const badgeHtml = item.tag ? `<div class="absolute top-4 right-4 bg-crimson text-white text-[10px] font-bold px-3 py-1.5 rounded-full z-10 uppercase tracking-wider shadow-lg">${item.tag}</div>` : '';
+                
+                // Note the inline `onerror` - if the image link fails, it instantly loads the fallback image.
+                const card = document.createElement('div');
+                card.className = "tilt-wrapper group h-full";
+                card.innerHTML = `
+                    <div class="tilt-card rounded-3xl overflow-hidden h-full flex flex-col cursor-pointer relative" data-tilt>
+                        ${badgeHtml}
+                        <div class="relative h-[220px] overflow-hidden bg-surface">
+                            <img src="${item.img}" 
+                                 onerror="this.onerror=null; this.src='${fallbackImg}';" 
+                                 alt="${item.name}" 
+                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out">
+                            <div class="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent"></div>
+                        </div>
+                        <div class="p-6 flex-grow flex flex-col justify-between relative z-10 -mt-6">
+                            <div>
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="font-serif text-xl font-bold text-white group-hover:text-gold transition-colors pr-2">${item.name}</h3>
+                                    <span class="text-gold font-bold whitespace-nowrap bg-gold/10 px-2 py-1 rounded-md text-sm">PKR ${item.price}</span>
+                                </div>
+                                <p class="text-gray-400 text-sm font-sans mb-6 leading-relaxed">${item.desc}</p>
+                            </div>
+                            <button onclick="addToCart(${item.id})" class="w-full py-3 bg-white/5 border border-white/10 text-white rounded-xl hover:bg-gold hover:text-dark hover:border-gold transition-all font-sans font-bold text-sm flex items-center justify-center gap-2">
+                                <i class="fas fa-plus"></i> Add to Order
+                            </button>
+                        </div>
+                    </div>
+                `;
+                menuContainer.appendChild(card);
+            });
+            initVanillaTilt();
+        }
+
+        // Filtering Styles
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                filterBtns.forEach(b => {
+                    b.classList.remove('bg-gold', 'text-dark', 'shadow-glow');
+                    b.classList.add('bg-card', 'text-gray-300', 'border-white/10');
+                });
+                e.target.classList.remove('bg-card', 'text-gray-300', 'border-white/10');
+                e.target.classList.add('bg-gold', 'text-dark', 'shadow-glow');
+                renderMenu(e.target.getAttribute('data-filter'));
+            });
+        });
+
+        renderMenu(); // Init menu
+
+        // --- 3. Vanilla 3D Tilt Engine ---
+        function initVanillaTilt() {
+            if (window.innerWidth < 768) return; // Disable complex 3D tilt on mobile for performance
+            
+            const elements = document.querySelectorAll('[data-tilt]');
+            elements.forEach(el => {
+                el.addEventListener('mousemove', (e) => {
+                    const rect = el.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = ((y - centerY) / centerY) * -6; 
+                    const rotateY = ((x - centerX) / centerX) * 6;
+                    
+                    el.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                });
+                
+                el.addEventListener('mouseleave', () => {
+                    el.style.transform = `rotateX(0) rotateY(0) scale3d(1, 1, 1)`;
+                });
+            });
+        }
+
+        // --- 4. Order Cart & WhatsApp Integration ---
+        let cart = [];
+        const ownerPhone = "923262626480"; 
+
+        window.addToCart = (id) => {
+            const item = menuData.find(i => i.id === id);
+            cart.push(item);
+            updateCartUI();
+            
+            document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
+            
+            // Visual pulse on receipt
+            const cartContainer = document.getElementById('cart-items').parentElement;
+            cartContainer.classList.add('ring-2', 'ring-gold', 'shadow-glow');
+            setTimeout(() => {
+                cartContainer.classList.remove('ring-2', 'ring-gold', 'shadow-glow');
+            }, 600);
+        };
+
+        window.removeFromCart = (index) => {
+            cart.splice(index, 1);
+            updateCartUI();
+        };
+
+        function updateCartUI() {
+            const container = document.getElementById('cart-items');
+            const totalEl = document.getElementById('cart-total');
+            const subtotalEl = document.getElementById('cart-subtotal');
+            const emptyMsg = document.getElementById('empty-cart-msg');
+            
+            if (cart.length === 0) {
+                container.innerHTML = '';
+                container.appendChild(emptyMsg);
+                emptyMsg.style.display = 'flex';
+                totalEl.innerText = '0';
+                subtotalEl.innerText = 'PKR 0';
+                return;
+            }
+            
+            emptyMsg.style.display = 'none';
+            container.innerHTML = '';
+            
+            let total = 0;
+            cart.forEach((item, index) => {
+                total += item.price;
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center bg-surface p-4 rounded-xl border border-white/5 mb-2";
+                div.innerHTML = `
+                    <div class="flex-1 pr-2">
+                        <p class="text-white font-bold">${item.name}</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-gold font-bold">PKR ${item.price}</span>
+                        <button onclick="removeFromCart(${index})" class="w-8 h-8 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"><i class="fas fa-times text-xs"></i></button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            totalEl.innerText = total.toLocaleString();
+            subtotalEl.innerText = `PKR ${total.toLocaleString()}`;
+        }
+
+        document.getElementById('wa-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('wa-name').value;
+            const guests = document.getElementById('wa-guests').value;
+            const time = document.getElementById('wa-time').value;
+            const notes = document.getElementById('wa-notes').value;
+
+            if (cart.length === 0 && !guests) {
+                alert("Please add items to your order or specify guest count to reserve a table.");
+                return;
+            }
+
+            let message = `*Ibn e Rahat - New Request* ???\n\n`;
+            message += `?? *Name:* ${name}\n`;
+            if (guests) message += `?? *Guests:* ${guests}\n`;
+            if (time) message += `?? *Date & Time:* ${time}\n`;
+            
+            if (cart.length > 0) {
+                message += `\n*?? ORDER DETAILS:*\n`;
+                let total = 0;
+                cart.forEach(item => {
+                    message += `?? ${item.name} - PKR ${item.price}\n`;
+                    total += item.price;
+                });
+                message += `\n*?? Total Estimate:* PKR ${total.toLocaleString()}\n`;
+            }
+
+            if (notes) message += `\n*?? Notes:* ${notes}\n`;
+
+            const encodedMsg = encodeURIComponent(message);
+            window.open(`https://wa.me/${ownerPhone}?text=${encodedMsg}`, '_blank');
+        });
+
+        // --- 5. Enhanced 3D Amber Particle Canvas ---
+        const canvas = document.getElementById('hero-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, particles;
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.z = Math.random() * 2 + 0.2; 
+                this.vx = (Math.random() - 0.5) * 0.4;
+                this.vy = (Math.random() - 0.5) * 0.4;
+                this.radius = Math.random() * 2;
+                // Vibrant amber/gold colors for particles
+                this.color = `rgba(245, 166, 35, ${Math.random() * 0.6 + 0.1})`; 
+            }
+            update() {
+                this.x += this.vx / this.z;
+                this.y += this.vy / this.z;
+                if (this.x < 0) this.x = width;
+                if (this.x > width) this.x = 0;
+                if (this.y < 0) this.y = height;
+                if (this.y > height) this.y = 0;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius / this.z, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            let count = window.innerWidth < 768 ? 40 : 100; // Optimize for mobile
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        let mouse = { x: null, y: null };
+        document.addEventListener('mousemove', (event) => {
+            mouse.x = event.x;
+            mouse.y = event.y;
+        });
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, width, height);
+            
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                
+                for (let j = i; j < particles.length; j++) {
+                    let dx = particles[i].x - particles[j].x;
+                    let dy = particles[i].y - particles[j].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(245, 166, 35, ${0.15 - distance/800})`; // Amber connection lines
+                        ctx.lineWidth = 0.6;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+
+                if (mouse.x != null) {
+                    let dx = mouse.x - particles[i].x;
+                    let dy = mouse.y - particles[i].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 120) {
+                        particles[i].x -= dx * 0.015;
+                        particles[i].y -= dy * 0.015;
+                    }
+                }
+            }
+            requestAnimationFrame(animateCanvas);
+        }
+
+        initParticles();
+        animateCanvas();
+
+    </script>
+</body>
+</html>
