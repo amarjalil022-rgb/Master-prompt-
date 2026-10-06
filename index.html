@@ -3,42 +3,464 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SceneForge — 20-minute story prompts for AI video</title>
+<meta name="theme-color" content="#0a0c10">
+<title>SceneForge — AI Video Story Studio</title>
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 <style>
-/* ===== Tokens ===== */
-:root {
-  --bg: #14110F;
-  --bg-raised: #1B1712;
-  --bg-card: #201A14;
-  --rule: #352C20;
-  --text: #EDE7DD;
-  --text-muted: #A89C87;
-  --text-faint: #7A6F5F;
+:root{
+  --bg:#080a0e; --panel:#10141a; --panel-2:#151a21; --panel-3:#0c1015;
+  --line:#242b35; --line-soft:#1b212a; --text:#f4f6f8; --muted:#9ca6b4; --faint:#657080;
+  --gold:#e7b94d; --gold-2:#9f7926;
+  --animals:#e7b94d; --fruits:#ff7651; --vegetables:#8fc45d;
+  --display:'Bebas Neue',Impact,sans-serif; --body:'DM Sans',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+  --shadow:0 22px 70px rgba(0,0,0,.34);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:86px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);line-height:1.55}
+body.modal-open{overflow:hidden}
+button,input{font:inherit}
+button{color:inherit}
+a{color:inherit}
+::selection{background:rgba(231,185,77,.25)}
 
-  --gold: #C9A227;
-  --gold-soft: #8E7320;
+.site-header{
+  position:sticky;top:0;z-index:30;
+  background:rgba(8,10,14,.82);backdrop-filter:blur(18px) saturate(140%);
+  border-bottom:1px solid rgba(255,255,255,.07)
+}
+.header-inner{max-width:1240px;margin:auto;padding:15px 24px;display:flex;align-items:center;gap:26px}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;min-width:max-content}
+.brand-mark{width:31px;height:31px;border:1px solid rgba(231,185,77,.6);border-radius:9px;display:grid;place-items:center;background:linear-gradient(145deg,rgba(231,185,77,.18),rgba(231,185,77,.03));font-family:var(--display);color:var(--gold);font-size:1.15rem}
+.wordmark{font-family:var(--display);font-size:1.65rem;letter-spacing:.045em}
+.wordmark span{color:var(--gold)}
+.header-spacer{flex:1}
+.nav{display:flex;gap:4px}
+.nav a{padding:8px 11px;border-radius:8px;text-decoration:none;color:var(--muted);font-size:.9rem;font-weight:600}
+.nav a:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.header-cta{border:1px solid var(--line);background:var(--panel);padding:8px 13px;border-radius:9px;font-size:.85rem;font-weight:700}
 
-  --animals: #C9A227;
-  --animals-dim: #4A3E17;
-  --fruits: #E2572B;
-  --fruits-dim: #4A2217;
-  --vegetables: #7FA84B;
-  --vegetables-dim: #2C3A1A;
+.hero{
+  position:relative;overflow:hidden;border-bottom:1px solid var(--line-soft);
+  background:
+    radial-gradient(circle at 18% 10%,rgba(231,185,77,.13),transparent 28%),
+    radial-gradient(circle at 86% 28%,rgba(111,130,180,.10),transparent 25%),
+    linear-gradient(180deg,#0b0e13 0%,#080a0e 100%);
+}
+.hero:before{content:"";position:absolute;inset:0;opacity:.28;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:58px 58px;mask-image:linear-gradient(to bottom,black,transparent 78%)}
+.hero-inner{position:relative;max-width:1240px;margin:auto;padding:82px 24px 64px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.65fr);gap:70px;align-items:end}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--gold);font-size:.76rem;text-transform:uppercase;letter-spacing:.15em;font-weight:800;margin-bottom:16px}
+.eyebrow i{display:block;width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 18px rgba(231,185,77,.8)}
+.hero h1{font-family:var(--display);font-size:clamp(3.5rem,7.2vw,6.9rem);line-height:.9;letter-spacing:.012em;margin:0 0 22px;max-width:850px}
+.hero h1 em{font-style:normal;color:var(--gold)}
+.hero-sub{font-size:1.05rem;color:var(--muted);max-width:690px;margin:0 0 30px}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px}
+.primary-btn,.ghost-btn{display:inline-flex;align-items:center;justify-content:center;border-radius:10px;padding:11px 16px;text-decoration:none;font-weight:800;font-size:.9rem;cursor:pointer}
+.primary-btn{background:var(--gold);color:#15120b;border:1px solid var(--gold)}
+.primary-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.ghost-btn{background:rgba(255,255,255,.035);border:1px solid var(--line);color:var(--text)}
+.ghost-btn:hover{background:rgba(255,255,255,.07)}
+.hero-panel{background:rgba(16,20,26,.72);border:1px solid var(--line);border-radius:16px;padding:21px;box-shadow:var(--shadow)}
+.panel-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.13em;color:var(--faint);font-weight:800}
+.pipeline{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:12px}
+.pipeline li{display:grid;grid-template-columns:29px 1fr;gap:11px;align-items:center}
+.pipeline-num{width:29px;height:29px;border-radius:8px;background:rgba(231,185,77,.12);border:1px solid rgba(231,185,77,.25);display:grid;place-items:center;color:var(--gold);font-size:.78rem;font-weight:800}
+.pipeline strong{display:block;font-size:.88rem}.pipeline span{display:block;color:var(--muted);font-size:.78rem;margin-top:1px}
 
-  --display: 'Bebas Neue', sans-serif;
-  --body: 'Inter', sans-serif;
-  --mono: 'JetBrains Mono', monospace;
+.toolbar-wrap{position:sticky;top:67px;z-index:18;background:rgba(8,10,14,.86);backdrop-filter:blur(15px);border-bottom:1px solid var(--line-soft)}
+.toolbar{max-width:1240px;margin:auto;padding:14px 24px;display:flex;gap:10px;align-items:center}
+.search{position:relative;flex:1;min-width:180px}
+.search input{width:100%;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:11px 13px 11px 38px;outline:none}
+.search input:focus{border-color:rgba(231,185,77,.55);box-shadow:0 0 0 3px rgba(231,185,77,.08)}
+.search-icon{position:absolute;left:13px;top:10px;color:var(--faint)}
+.filter-row{display:flex;gap:6px;flex-wrap:wrap}
+.filter{border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:9px;padding:9px 12px;cursor:pointer;font-size:.8rem;font-weight:700}
+.filter.active,.filter:hover{color:var(--text);border-color:rgba(231,185,77,.42);background:rgba(231,185,77,.08)}
+.result-count{white-space:nowrap;color:var(--faint);font-size:.78rem;font-weight:700}
+
+main{max-width:1240px;margin:auto}
+.world-section{padding:68px 24px 22px;border-bottom:1px solid var(--line-soft)}
+.world-section:last-child{border-bottom:0}
+.world-heading{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:25px}
+.heading-copy{max-width:700px}
+.section-kicker{font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;font-weight:800;color:var(--faint);margin-bottom:6px}
+.world-heading h2{font-family:var(--display);font-size:2.65rem;line-height:1;margin:0 0 7px}
+.world-heading p{margin:0;color:var(--muted);font-size:.92rem}
+.section-count{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:9px 12px;color:var(--muted);font-size:.78rem;font-weight:700;white-space:nowrap}
+[data-world="animals"] .world-heading h2{color:var(--animals)}
+[data-world="fruits"] .world-heading h2{color:var(--fruits)}
+[data-world="vegetables"] .world-heading h2{color:var(--vegetables)}
+
+.card-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;padding-bottom:34px}
+.story-card{position:relative;text-align:left;border:1px solid var(--line);border-radius:13px;background:linear-gradient(145deg,var(--panel),#0d1116);padding:19px;min-height:185px;cursor:pointer;transition:.18s ease;overflow:hidden}
+.story-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--card-accent,var(--gold))}
+.story-card:after{content:"";position:absolute;width:130px;height:130px;right:-65px;top:-65px;border-radius:50%;background:var(--card-accent,var(--gold));opacity:.045;transition:.2s}
+.story-card:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--card-accent,var(--gold)) 45%,var(--line));box-shadow:0 14px 34px rgba(0,0,0,.2)}
+.story-card:hover:after{transform:scale(1.5);opacity:.08}
+.story-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}
+.story-index{font-family:var(--mono);font-size:.68rem;color:var(--faint)}
+.story-tag{font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;color:var(--card-accent,var(--gold));font-weight:800}
+.story-card h3{font-family:var(--display);font-size:1.65rem;line-height:1;margin:0 0 10px;font-weight:400;letter-spacing:.015em}
+.story-card p{margin:0;color:var(--muted);font-size:.84rem;line-height:1.52;min-height:51px}
+.card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:17px;padding-top:13px;border-top:1px solid var(--line-soft)}
+.card-cta{font-size:.77rem;font-weight:800;color:var(--text)}
+.card-meta{font-size:.68rem;color:var(--faint);font-family:var(--mono)}
+
+.empty{display:none;text-align:center;padding:55px 20px;color:var(--muted)}
+.empty.show{display:block}.empty strong{color:var(--text);display:block;margin-bottom:4px}
+
+.site-footer{max-width:1240px;margin:auto;padding:36px 24px 58px;display:flex;justify-content:space-between;gap:20px;color:var(--faint);font-size:.78rem;border-top:1px solid var(--line-soft)}
+.site-footer strong{color:var(--muted)}
+
+.modal-backdrop{position:fixed;inset:0;background:rgba(2,4,7,.78);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px;z-index:60}
+.modal-backdrop.open{display:flex}
+.modal{width:min(920px,100%);height:min(790px,90vh);background:#0d1116;border:1px solid var(--line);border-radius:17px;box-shadow:0 35px 110px rgba(0,0,0,.62);display:flex;flex-direction:column;overflow:hidden}
+.modal-head{padding:22px 23px 17px;display:flex;align-items:flex-start;justify-content:space-between;gap:18px;border-bottom:1px solid var(--line-soft);background:linear-gradient(180deg,#12171e,#0d1116)}
+.modal-eyebrow{font-size:.68rem;text-transform:uppercase;letter-spacing:.14em;color:var(--modal-accent,var(--gold));font-weight:900}
+.modal h3{font-family:var(--display);font-size:2.15rem;line-height:1;margin:5px 0 0;font-weight:400}
+.modal-close{width:35px;height:35px;border:1px solid var(--line);background:var(--panel);border-radius:9px;color:var(--muted);font-size:1.35rem;cursor:pointer}
+.modal-close:hover{color:var(--text);background:#1a2028}
+.modal-logline{padding:15px 23px;margin:0;color:var(--muted);font-size:.88rem;border-bottom:1px solid var(--line-soft)}
+.prompt-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line-soft);background:#0a0e13}
+.prompt-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.13em;color:var(--faint);font-weight:900}
+.copy-btn{border:0;border-radius:8px;background:var(--modal-accent,var(--gold));color:#14110a;padding:9px 14px;font-size:.78rem;font-weight:900;cursor:pointer}
+.copy-btn:hover{filter:brightness(1.08)}
+.copy-confirm{font-size:.76rem;color:#9fc47a;opacity:0;transition:.2s}.copy-confirm.show{opacity:1}
+.prompt-box{margin:0;padding:20px 21px;flex:1;overflow:auto;white-space:pre-wrap;background:#070a0e;color:#d7dde5;font:500 .76rem/1.7 var(--mono);tab-size:2}
+.modal-foot{padding:10px 16px;border-top:1px solid var(--line-soft);color:var(--faint);font-size:.7rem;display:flex;justify-content:space-between;gap:15px}
+
+@media (max-width:900px){
+  .hero-inner{grid-template-columns:1fr;gap:35px}.hero h1{max-width:720px}
+  .card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .nav{display:none}.header-cta{margin-left:auto}
+}
+@media (max-width:640px){
+  .header-inner{padding:12px 16px}.brand-mark{width:28px;height:28px}.wordmark{font-size:1.5rem}
+  .hero-inner{padding:58px 17px 45px}.hero h1{font-size:clamp(3rem,16vw,4.5rem)}
+  .toolbar-wrap{top:58px}.toolbar{padding:10px 16px;flex-wrap:wrap}.search{flex-basis:100%}.result-count{display:none}
+  .world-section{padding:48px 17px 15px}.world-heading{align-items:start;flex-direction:column;gap:13px}.card-grid{grid-template-columns:1fr}
+  .story-card{min-height:0}.site-footer{padding:30px 17px 45px;flex-direction:column}
+  .modal{height:94vh;border-radius:13px}.modal-head{padding:18px}.modal-logline{padding:13px 18px}.modal h3{font-size:1.85rem}
+  .prompt-box{padding:16px;font-size:.7rem}.modal-foot{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}.story-card,.primary-btn{transition:none}
+}
+</style>
+</head>
+
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="#" aria-label="SceneForge home">
+      <span class="brand-mark">S</span><span class="wordmark">Scene<span>Forge</span></span>
+    </a>
+    <div class="header-spacer"></div>
+    <nav class="nav" aria-label="World navigation">
+      <a href="#animals">Animals</a><a href="#fruits">Fruits</a><a href="#vegetables">Vegetables</a>
+    </nav>
+    <span class="header-cta">30 story blueprints</span>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="eyebrow"><i></i> AI Video Story Studio</div>
+      <h1>Turn one story idea into a <em>20-minute</em> video script.</h1>
+      <p class="hero-sub">Choose a world, open a story blueprint, and copy a production-ready master prompt. Each prompt is designed to generate 150 self-contained 8-second scenes with consistent characters, locations, camera direction, dialogue, mood, and sound.</p>
+      <div class="hero-actions">
+        <a class="primary-btn" href="#animals">Explore story worlds ↓</a>
+        <a class="ghost-btn" href="#how-it-works">How it works</a>
+      </div>
+    </div>
+    <aside class="hero-panel" id="how-it-works">
+      <div class="panel-label">Three-step workflow</div>
+      <ol class="pipeline">
+        <li><b class="pipeline-num">01</b><div><strong>Choose a blueprint</strong><span>Pick an animal, fruit, or vegetable world.</span></div></li>
+        <li><b class="pipeline-num">02</b><div><strong>Copy the master prompt</strong><span>One click copies the complete prompt.</span></div></li>
+        <li><b class="pipeline-num">03</b><div><strong>Generate your screenplay</strong><span>Paste into Claude or ChatGPT and expand it into scenes.</span></div></li>
+      </ol>
+    </aside>
+  </div>
+</section>
+
+<div class="toolbar-wrap">
+  <div class="toolbar">
+    <label class="search">
+      <span class="search-icon">⌕</span>
+      <input id="search" type="search" placeholder="Search stories, characters, conflicts..." autocomplete="off">
+    </label>
+    <div class="filter-row" role="group" aria-label="Filter stories">
+      <button class="filter active" data-filter="all">All</button>
+      <button class="filter" data-filter="animals">Animals</button>
+      <button class="filter" data-filter="fruits">Fruits</button>
+      <button class="filter" data-filter="vegetables">Vegetables</button>
+    </div>
+    <span class="result-count" id="result-count">30 stories</span>
+  </div>
+</div>
+
+<main>
+  <section id="animals" class="world-section" data-world="animals">
+    <div class="world-heading"><div class="heading-copy"><div class="section-kicker">World 01</div><h2>Animals</h2><p>Anthropomorphic lions, tigers, panthers, wolves, and more—human behavior with distinctive animal faces, fur, and builds.</p></div><div class="section-count">10 blueprints</div></div>
+    <div class="card-grid" id="grid-animals"></div><div class="empty" id="empty-animals"><strong>No animal stories found.</strong>Try a different search or filter.</div>
+  </section>
+  <section id="fruits" class="world-section" data-world="fruits">
+    <div class="world-heading"><div class="heading-copy"><div class="section-kicker">World 02</div><h2>Fruits</h2><p>Mangoes, apples, citrus, berries, and tropical characters collide in a stylized fruit-city underworld.</p></div><div class="section-count">10 blueprints</div></div>
+    <div class="card-grid" id="grid-fruits"></div><div class="empty" id="empty-fruits"><strong>No fruit stories found.</strong>Try a different search or filter.</div>
+  </section>
+  <section id="vegetables" class="world-section" data-world="vegetables">
+    <div class="world-heading"><div class="heading-copy"><div class="section-kicker">World 03</div><h2>Vegetables</h2><p>Market-square power struggles, family rivalries, rebellions, and turf wars with vegetable characters.</p></div><div class="section-count">10 blueprints</div></div>
+    <div class="card-grid" id="grid-vegetables"></div><div class="empty" id="empty-vegetables"><strong>No vegetable stories found.</strong>Try a different search or filter.</div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div><strong>SceneForge</strong> — story blueprints for AI video generation.</div>
+  <div>20 min · 150 scenes · 8 sec each</div>
+</footer>
+
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-head">
+      <div><span class="modal-eyebrow" id="modal-world"></span><h3 id="modal-title"></h3></div>
+      <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+    </div>
+    <p class="modal-logline" id="modal-logline"></p>
+    <div class="prompt-toolbar">
+      <span class="prompt-label">Master prompt · ready to paste</span>
+      <div style="display:flex;align-items:center;gap:9px"><span class="copy-confirm" id="copy-confirm">Copied ✓</span><button class="copy-btn" id="copy-btn">Copy prompt</button></div>
+    </div>
+    <pre class="prompt-box" id="modal-prompt"></pre>
+    <div class="modal-foot"><span>Self-contained scenes reduce continuity drift.</span><span>ESC to close</span></div>
+  </div>
+</div>
+
+<script>
+const WORLDS = {
+  animals:{label:"Animals", castNote:"every character is an anthropomorphic animal—walking upright, speaking and behaving like a person while retaining the species' recognizable face, fur, proportions and physical traits"},
+  fruits:{label:"Fruits", castNote:"every character is an anthropomorphic fruit—with a recognizable fruit-shaped body, expressive face, arms and legs, while dressed and behaving like a person"},
+  vegetables:{label:"Vegetables", castNote:"every character is an anthropomorphic vegetable—with a recognizable vegetable-shaped body, expressive face, arms and legs, while dressed and behaving like a person"}
+};
+
+const STORIES = [
+
+  // ───────────────────────── ANIMALS ─────────────────────────
+  { id: "a1", world: "animals", title: "Empire of Shadows",
+    logline: "A lion crime boss rules a neo-noir city until a black panther warlord moves to take his throne." },
+  { id: "a2", world: "animals", title: "Jungle Mafia",
+    logline: "Two tiger brothers split a drug empire down the middle, and only one can inherit the family name." },
+  { id: "a3", world: "animals", title: "The Wolf Pact",
+    logline: "A wolf pack and a fox syndicate hold an uneasy truce over the city's docks — until one broken promise ignites a war." },
+  { id: "a4", world: "animals", title: "Kingdom of Claws",
+    logline: "When the old lion king dies without naming an heir, his hyena general and his estranged son both claim the crown." },
+  { id: "a5", world: "animals", title: "The Last Pride",
+    logline: "Exiled from her pride as a cub, a lioness returns as a hardened mercenary to settle an old betrayal." },
+  { id: "a6", world: "animals", title: "Shadow Paws",
+    logline: "An elite cat assassin is hired to kill her own former mentor, the head of the city's biggest crime family." },
+  { id: "a7", world: "animals", title: "The Great Stampede",
+    logline: "An elephant patriarch and a rhino warlord go to war over the last water rights in a drought-stricken savanna city." },
+  { id: "a8", world: "animals", title: "Feathers of Fire",
+    logline: "Rival eagle and falcon sky-gangs battle for control of the city's rooftops after a courier heist goes wrong." },
+  { id: "a9", world: "animals", title: "Venom Alley",
+    logline: "A cobra cartel boss trusts no one — until his most loyal viper lieutenant is revealed as a spy." },
+  { id: "a10", world: "animals", title: "The Iron Horn",
+    logline: "A retired rhino enforcer is pulled back into the underworld when his old buffalo rival threatens his daughter." },
+
+  // ───────────────────────── FRUITS ─────────────────────────
+  { id: "f1", world: "fruits", title: "Mango Mafia",
+    logline: "The reigning Mango don of Fruit City must defend his orchard territory from a hostile Lychee takeover." },
+  { id: "f2", world: "fruits", title: "The Apple Uprising",
+    logline: "A young Apple from the orchard slums rises through the ranks to challenge the ruling Pomegranate dynasty." },
+  { id: "f3", world: "fruits", title: "Citrus Syndicate",
+    logline: "Orange and Lemon crime families have split the city's juice trade for decades — until a bitter betrayal boils over." },
+  { id: "f4", world: "fruits", title: "Banana Republic",
+    logline: "A slick Banana con-artist tries to con the wrong family and ends up triggering a city-wide turf war." },
+  { id: "f5", world: "fruits", title: "The Grape Vine",
+    logline: "A Grape family's prized vineyard empire is threatened when their estranged Raisin uncle returns to claim his share." },
+  { id: "f6", world: "fruits", title: "Watermelon Wars",
+    logline: "Two rival Watermelon farming clans go to war over a single, perfect plot of land at the center of Fruit City." },
+  { id: "f7", world: "fruits", title: "Berry Street Boys",
+    logline: "A crew of small-time Berries — Straw, Blue, and Rasp — try to survive the big leagues of the fruit underworld." },
+  { id: "f8", world: "fruits", title: "The Pineapple Throne",
+    logline: "The spiky, untouchable Pineapple queen of the tropics faces a coup from her own trusted Coconut advisor." },
+  { id: "f9", world: "fruits", title: "Papaya Paradise Heist",
+    logline: "A crew of fruit outlaws plans one last heist to steal the legendary golden seed from the Papaya vault." },
+  { id: "f10", world: "fruits", title: "Coconut Coast Showdown",
+    logline: "A weathered old Coconut smuggler must choose between one final score and protecting his young Lime apprentice." },
+
+  // ───────────────────────── VEGETABLES ─────────────────────────
+  { id: "v1", world: "vegetables", title: "Potato Empire",
+    logline: "The Potato family has ruled the market square for generations — until a sharp-tongued Onion crime boss moves in." },
+  { id: "v2", world: "vegetables", title: "The Onion Syndicate",
+    logline: "An Onion boss who makes everyone around him cry hides a devastating secret under every layer of his empire." },
+  { id: "v3", world: "vegetables", title: "Spice Route Showdown",
+    logline: "A fiery Chili gang controls the spice trade routes until a cold, calculating Ginger cartel challenges their reign." },
+  { id: "v4", world: "vegetables", title: "The Cabbage Court",
+    logline: "In a market run by old Cabbage judges and councils, a young Broccoli upstart refuses to play by old rules." },
+  { id: "v5", world: "vegetables", title: "Carrot Top Rebellion",
+    logline: "The underground Carrot workers rise up against the ruling Pumpkin landlords who have hoarded the harvest." },
+  { id: "v6", world: "vegetables", title: "Okra Outlaws",
+    logline: "A gang of fast-talking Okra bandits robs from the rich Cauliflower elite to feed the vegetable slums." },
+  { id: "v7", world: "vegetables", title: "Garlic Ghetto",
+    logline: "A small but fearsome Garlic family controls the back alleys, their strength always underestimated — until it's too late." },
+  { id: "v8", world: "vegetables", title: "The Pea Pod Brotherhood",
+    logline: "Three Pea brothers, inseparable since birth, are torn apart when one of them betrays the family pod for power." },
+  { id: "v9", world: "vegetables", title: "Pumpkin Patch Wars",
+    logline: "Every harvest season, the Pumpkin clans go to war over the biggest patch of land — this year, it turns deadly." },
+  { id: "v10", world: "vegetables", title: "Tomato Town Turf War",
+    logline: "A hot-headed young Tomato enforcer must keep the peace between two warring vegetable families before the whole town burns." },
+];
+
+function buildPrompt(story){
+  const world=WORLDS[story.world];
+  return `You are an expert screenwriter, storyboard artist, and AI-video prompt designer.
+
+PROJECT
+Title: "${story.title}"
+Genre: Crime / Action / Drama
+Target runtime: exactly 20 minutes
+Scene duration: exactly 8 seconds
+Total scenes: exactly 150
+World: ${world.label}
+
+WORLD RULE
+This story takes place in a world where ${world.castNote}. Keep this visual rule consistent in every scene.
+
+STORY SEED
+${story.logline}
+
+YOUR JOB
+Expand the seed into a cinematic, emotionally grounded 20-minute story. Do not merely create a sequence of fights. Build a strong opening hook, clear character goals, escalating stakes, meaningful relationships, betrayal or loyalty where appropriate, a midpoint complication, a decisive climax, and a satisfying ending.
+
+CONTINUITY LOCK — IMPORTANT
+Before writing scenes, establish a fixed character bible and story logic. Once a character's name, species/type, age impression, body shape, colors, outfit, shoes, accessories, vehicle, relationships, personality, or role is established, do not casually change it later. Keep locations, time of day, weather, injuries, props, vehicles, and character positions logically continuous from one scene to the next. Do not introduce unexplained costume changes, duplicate characters, teleportation, or sudden location changes.
+
+CHARACTER BIBLE
+First provide a concise but specific bible for every major character:
+- Name
+- Species/type
+- Approximate age impression
+- Physical appearance
+- Personality
+- Role in the story
+- Signature outfit, including shoes, accessories and important visual details
+- Vehicle, weapon or signature prop when relevant
+- Relationship to other major characters
+
+SCENE GENERATION
+Then generate exactly 150 scenes, divided into clear acts. Each scene represents exactly 8 seconds. Do not merge scenes, skip scene numbers, or create extra scenes.
+
+Every scene MUST be self-contained because the AI video generator has no memory between scenes. Repeat the necessary character appearance and outfit details inside every scene rather than saying "same outfit as before."
+
+Use this exact scene structure:
+
+Scene XXX (MM:SS–MM:SS)
+Characters used: [names + species/type + concise full appearance/outfit]
+Location / Environment: [specific setting, time of day, weather, important background details]
+Action: [one continuous visual action that can realistically happen in 8 seconds]
+Camera: [shot size, angle, movement, lens/cinematic framing]
+Dialogue: [only if needed; write in Roman Urdu using Latin letters and identify the speaker]
+Mood / BGM / SFX: [emotional tone, music direction, ambience and key sound effects]
+Continuity: [what visual detail or story beat must carry into the next scene]
+
+TIMING RULES
+- Scene 001 starts at 00:00.
+- Every scene is exactly 8 seconds.
+- Scene 150 ends at 20:00.
+- Use accurate cumulative timestamps.
+- Never overlap timestamps.
+- Make the story pacing cinematic: short visual beats early, escalating pressure through the middle, longer emotional payoff around the climax and ending.
+
+VISUAL QUALITY
+Write prompts that are useful to modern AI video generators. Favor concrete visual descriptions over vague adjectives. Specify lighting, environment, body language, camera movement and physical action when they matter. Keep each scene achievable within 8 seconds. Avoid impossible multi-location actions inside one scene.
+
+DIALOGUE
+Use dialogue sparingly and naturally. Roman Urdu only for spoken dialogue. Keep each spoken line short enough to fit naturally inside an 8-second scene. Do not put long monologues into a single scene.
+
+OUTPUT RULES
+1. Character bible first.
+2. Then Acts with exactly 150 numbered scenes.
+3. Every scene follows the structure above.
+4. No placeholder text such as "same as above."
+5. No skipped details that are required for visual continuity.
+6. No commentary about your writing process.
+7. Do not ask me follow-up questions; make sensible creative decisions and complete the story.
+8. End with a brief final continuity check confirming that there are exactly 150 scenes and exactly 20 minutes of runtime.
+
+Now write the complete production-ready screenplay.`;
 }
 
-* { box-sizing: border-box; }
+(function(){
+  const grids={animals:document.getElementById("grid-animals"),fruits:document.getElementById("grid-fruits"),vegetables:document.getElementById("grid-vegetables")};
+  const sections={animals:document.querySelector('[data-world="animals"]'),fruits:document.querySelector('[data-world="fruits"]'),vegetables:document.querySelector('[data-world="vegetables"]')};
+  const search=document.getElementById("search"), resultCount=document.getElementById("result-count");
+  let activeFilter="all";
 
-html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+  STORIES.forEach((story,index)=>{
+    const card=document.createElement("button");
+    card.className="story-card";
+    card.type="button";
+    card.dataset.world=story.world;
+    card.dataset.search=(story.title+" "+story.logline+" "+WORLDS[story.world].label).toLowerCase();
+    card.style.setProperty("--card-accent",`var(--${story.world})`);
+    card.innerHTML=`
+      <div class="story-top"><span class="story-index">${String(index+1).padStart(2,"0")}</span><span class="story-tag">${WORLDS[story.world].label}</span></div>
+      <h3>${story.title}</h3>
+      <p>${story.logline}</p>
+      <div class="card-footer"><span class="card-cta">Open blueprint →</span><span class="card-meta">150 × 8s</span></div>`;
+    card.addEventListener("click",()=>openModal(story));
+    grids[story.world].appendChild(card);
+  });
 
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
+  function applyFilters(){
+    const q=search.value.trim().toLowerCase(); let count=0;
+    Object.keys(grids).forEach(world=>{
+      let visible=0;
+      [...grids[world].children].forEach(card=>{
+        const matchWorld=activeFilter==="all"||activeFilter===world;
+        const matchSearch=!q||card.dataset.search.includes(q);
+        const show=matchWorld&&matchSearch;
+        card.hidden=!show;
+        if(show){visible++;count++;}
+      });
+      sections[world].hidden=activeFilter!=="all"&&activeFilter!==world;
+      document.getElementById("empty-"+world).classList.toggle("show",visible===0&&!sections[world].hidden);
+    });
+    resultCount.textContent=`${count} ${count===1?"story":"stories"}`;
+  }
+  search.addEventListener("input",applyFilters);
+  document.querySelectorAll(".filter").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll(".filter").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active"); activeFilter=btn.dataset.filter; applyFilters();
+    });
+  });
+
+  const backdrop=document.getElementById("modal-backdrop"), modal=document.querySelector(".modal");
+  const modalWorld=document.getElementById("modal-world"), modalTitle=document.getElementById("modal-title"), modalLogline=document.getElementById("modal-logline"), modalPrompt=document.getElementById("modal-prompt"), closeBtn=document.getElementById("modal-close"), copyBtn=document.getElementById("copy-btn"), copyConfirm=document.getElementById("copy-confirm");
+
+  function openModal(story){
+    const world=WORLDS[story.world];
+    modal.style.setProperty("--modal-accent",`var(--${story.world})`);
+    modalWorld.textContent=world.label; modalTitle.textContent=story.title; modalLogline.textContent=story.logline; modalPrompt.textContent=buildPrompt(story);
+    copyConfirm.classList.remove("show"); backdrop.classList.add("open"); document.body.classList.add("modal-open"); closeBtn.focus();
+  }
+  function closeModal(){backdrop.classList.remove("open");document.body.classList.remove("modal-open")}
+  closeBtn.addEventListener("click",closeModal);
+  backdrop.addEventListener("click",e=>{if(e.target===backdrop)closeModal()});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&backdrop.classList.contains("open"))closeModal()});
+  copyBtn.addEventListener("click",async()=>{
+    try{await navigator.clipboard.writeText(modalPrompt.textContent);copyConfirm.classList.add("show");setTimeout(()=>copyConfirm.classList.remove("show"),1600)}
+    catch(e){const range=document.createRange();range.selectNodeContents(modalPrompt);const sel=getSelection();sel.removeAllRanges();sel.addRange(range)}
+  });
+  applyFilters();
+})();
+</script>
+</body>
+</html>
